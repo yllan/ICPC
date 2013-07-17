@@ -20,14 +20,6 @@ struct IndexValue
     idx(anIdx), v(aV) {}
 };
 
-bool allZero()
-{
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j < n; j++)
-      if (d[i][j] != 0) return false;
-  return true;
-}
-
 long long maxVolume(int topArea, int depth, int poolArea)
 {
   long long numer = (long long)topArea * depth;
@@ -57,9 +49,7 @@ long long popDescendingSeq(std::stack<IndexValue> *q, int min_depth, int w, int 
 }
 
 long long solve(int a, int b)
-{
-  if (allZero()) return 0;
-  
+{  
   int min_between_rows[MAX];
   long long max = 0;
 
