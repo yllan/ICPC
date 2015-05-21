@@ -35,15 +35,17 @@ string text;
 
 ll dist[3000][3000];
 
-inline int node_of(int x, int y) {
+typedef int pos;
+
+inline pos node_of(int x, int y) {
 	return x * c + y;
 }
 
-inline int row_of(int n) {
+inline int row_of(pos n) {
 	return n / c;
 }
 
-inline int column_of(int n) {
+inline int column_of(pos n) {
 	return n % c;
 }
 
@@ -82,9 +84,7 @@ int main()
 	cin >> r >> c;
 	REPD(i, r) cin >> keyboard[i];
 	cin >> text;
-
 	text.push_back('*');
-	int length = text.length();
 
 	// shortest path
 	construct_distance();
@@ -94,18 +94,18 @@ int main()
 	// 	if (dist[i][j] < INF && dist[i][j] > 0) 
 	// 		printf("(%d,%d) -> [%d,%d] = %lld\n", row_of(i), column_of(i), row_of(j), column_of(j), dist[i][j]);
 
-	map<int, ll> current;
-
-	map<char, vector<int> > nodes_of_key;
-	REPD(i, r) REPD(j, c) nodes_of_key[keyboard[i][j]].push_back(node_of(i, j));
-
+	map<pos, ll> current;
 	current[0] = 0LL;
 
+	map<char, vector<pos> > nodes_of_key;
+	REPD(i, r) REPD(j, c) nodes_of_key[keyboard[i][j]].push_back(node_of(i, j));
+
+
 	snuke(text, k) {
-		map<int, ll> next;
+		map<pos, ll> next;
 		snuke(current, it) snuke(nodes_of_key[*k], jt) {
-			int current_idx = it->first;
-			int next_idx = *jt;
+			pos current_idx = it->first;
+			pos next_idx = *jt;
 			ll current_dist = it->second;
 			next[next_idx] = min(next.find(next_idx) == next.end() ? INF : next[next_idx],
 								 current_dist + dist[current_idx][next_idx]);
@@ -115,5 +115,5 @@ int main()
 
 	ll min_keystroke = INF;
 	snuke(current, it) min_keystroke = min(min_keystroke, it->second);
-	cout << (min_keystroke + length) << endl; 
+	cout << (min_keystroke + text.length()) << endl; 
 }
