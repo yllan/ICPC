@@ -38,82 +38,82 @@ ll dist[3000][3000];
 typedef int pos;
 
 inline pos node_of(int x, int y) {
-	return x * c + y;
+    return x * c + y;
 }
 
 inline int row_of(pos n) {
-	return n / c;
+    return n / c;
 }
 
 inline int column_of(pos n) {
-	return n % c;
+    return n % c;
 }
 
 void construct_distance() 
 {
-	REPD(i, r * c) REPD(j, r * c) dist[i][j] = (i == j) ? 0 : INF;
+    REPD(i, r * c) REPD(j, r * c) dist[i][j] = (i == j) ? 0 : INF;
 
-	int dx[] = {0, 1, 0, -1};
-	int dy[] = {1, 0, -1, 0};
-	
-	REPD(i, r) REPD(j, c) {
-		char key = keyboard[i][j];
-		REPD(d, 4) {
-			int ni = i, nj = j;
-			while (0 <= ni && ni < r && 0 <= nj && nj < c) {
-				if (keyboard[ni][nj] != key) {
-					dist[node_of(i, j)][node_of(ni, nj)] = 1;
-					break;
-				}
-				ni += dx[d];
-				nj += dy[d];
-			}
-		}
-	}
+    int dx[] = {0, 1, 0, -1};
+    int dy[] = {1, 0, -1, 0};
+    
+    REPD(i, r) REPD(j, c) {
+        char key = keyboard[i][j];
+        REPD(d, 4) {
+            int ni = i, nj = j;
+            while (0 <= ni && ni < r && 0 <= nj && nj < c) {
+                if (keyboard[ni][nj] != key) {
+                    dist[node_of(i, j)][node_of(ni, nj)] = 1;
+                    break;
+                }
+                ni += dx[d];
+                nj += dy[d];
+            }
+        }
+    }
 }
 
 void warshall_floyd()
 {
-	REPD(k, r * c) REPD(i, r * c) REPD(j, r * c)
-		if (dist[i][k] + dist[k][j] < dist[i][j])
-			dist[i][j] = dist[i][k] + dist[k][j];
+    REPD(k, r * c) REPD(i, r * c) REPD(j, r * c)
+        if (dist[i][k] + dist[k][j] < dist[i][j])
+            dist[i][j] = dist[i][k] + dist[k][j];
 }
 
 int main()
 {
-	cin >> r >> c;
-	REPD(i, r) cin >> keyboard[i];
-	cin >> text;
-	text.push_back('*');
+    cin >> r >> c;
+    REPD(i, r) cin >> keyboard[i];
+    cin >> text;
+    text.push_back('*');
 
-	// shortest path
-	construct_distance();
-	warshall_floyd();
+    // shortest path
+    construct_distance();
+    warshall_floyd();
 
-	// REPD(i, r * c) REPD(j, r * c) 
-	// 	if (dist[i][j] < INF && dist[i][j] > 0) 
-	// 		printf("(%d,%d) -> [%d,%d] = %lld\n", row_of(i), column_of(i), row_of(j), column_of(j), dist[i][j]);
+    // REPD(i, r * c) REPD(j, r * c) 
+    //  if (dist[i][j] < INF && dist[i][j] > 0) 
+    //      printf("(%d,%d) -> [%d,%d] = %lld\n", row_of(i), column_of(i), row_of(j), column_of(j), dist[i][j]);
 
-	map<pos, ll> current;
-	current[0] = 0LL;
+    map<pos, ll> current;
+    current[0] = 0LL;
 
-	map<char, vector<pos> > nodes_of_key;
-	REPD(i, r) REPD(j, c) nodes_of_key[keyboard[i][j]].push_back(node_of(i, j));
+    map<char, vector<pos> > nodes_of_key;
+    REPD(i, r) REPD(j, c) nodes_of_key[keyboard[i][j]].push_back(node_of(i, j));
 
 
-	snuke(text, k) {
-		map<pos, ll> next;
-		snuke(current, it) snuke(nodes_of_key[*k], jt) {
-			pos current_idx = it->first;
-			pos next_idx = *jt;
-			ll current_dist = it->second;
-			next[next_idx] = min(next.find(next_idx) == next.end() ? INF : next[next_idx],
-								 current_dist + dist[current_idx][next_idx]);
-		}
-		current = next;
-	}
+    snuke(text, k) {
+        map<pos, ll> next;
+        snuke(current, it) snuke(nodes_of_key[*k], jt) {
+            pos current_idx = it->first;
+            pos next_idx = *jt;
+            ll current_dist = it->second;
+            next[next_idx] = min(next.find(next_idx) == next.end() ? INF : next[next_idx],
+                                 current_dist + dist[current_idx][next_idx]);
+        }
+        current = next;
+    }
 
-	ll min_keystroke = INF;
-	snuke(current, it) min_keystroke = min(min_keystroke, it->second);
-	cout << (min_keystroke + text.length()) << endl; 
+    ll min_keystroke = INF;
+    snuke(current, it) min_keystroke = min(min_keystroke, it->second);
+    cout << (min_keystroke + text.length()) << endl; 
 }
