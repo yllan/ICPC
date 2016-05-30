@@ -1,6 +1,4 @@
 #include <iostream>
-#include <sstream>
-#include <fstream>
 #include <string>
 #include <vector>
 #include <deque>
@@ -8,8 +6,8 @@
 #include <stack>
 #include <set>
 #include <map>
+#include <tuple>
 #include <algorithm>
-#include <functional>
 #include <utility>
 #include <bitset>
 #include <cmath>
@@ -27,93 +25,80 @@ using namespace std;
 typedef long long ll;
 #define INF (1ll<<60)
 
-// Let's try the professional template! It's copied from infamous rng_58.
+#define MAX_KB_SIZE 100
 
 int r, c;
-char keyboard[60][60];
-string text;
+char keyboard[MAX_KB_SIZE][MAX_KB_SIZE];
+enum {
+  N = 0,
+  E,
+  W,
+  S
+};
+int displace[4][MAX_KB_SIZE][MAX_KB_SIZE];
 
-ll dist[3000][3000];
+void find_displace(int direction) {
+  int di[4] = {-1, 0, 0, 1};
+  int dj[4] = {0, 1, -1, 0};
 
-typedef int pos;
-
-inline pos node_of(int x, int y) {
-    return x * c + y;
-}
-
-inline int row_of(pos n) {
-    return n / c;
-}
-
-inline int column_of(pos n) {
-    return n % c;
-}
-
-void construct_distance() 
-{
-    REPD(i, r * c) REPD(j, r * c) dist[i][j] = (i == j) ? 0 : INF;
-
-    int dx[] = {0, 1, 0, -1};
-    int dy[] = {1, 0, -1, 0};
-    
-    REPD(i, r) REPD(j, c) {
-        char key = keyboard[i][j];
-        REPD(d, 4) {
-            int ni = i, nj = j;
-            while (0 <= ni && ni < r && 0 <= nj && nj < c) {
-                if (keyboard[ni][nj] != key) {
-                    dist[node_of(i, j)][node_of(ni, nj)] = 1;
-                    break;
-                }
-                ni += dx[d];
-                nj += dy[d];
-            }
-        }
+  for (int i = 0; i < r; i++) {
+    for (int j = 0; j < c; j++) {
+      int ni = i + di[direction], nj = j + dj[direction]; 
+      for (;
+           ni >= 0 && ni < r && nj >= 0 && nj < c && keyboard[i][j] == keyboard[ni][nj];
+           ni = ni + di[direction], nj = nj + dj[direction]) {
+      }
+      displace[direction][i][j] = (ni < 0 || ni >= r || nj < 0 || nj >= c) ? 0 : (ni - i) + (nj - j);
     }
+  }
 }
 
-void warshall_floyd()
-{
-    REPD(k, r * c) REPD(i, r * c) REPD(j, r * c)
-        if (dist[i][k] + dist[k][j] < dist[i][j])
-            dist[i][j] = dist[i][k] + dist[k][j];
-}
+typedef tuple<int, int, int> node;
+int dist[MAX_KB_SIZE][MAX_KB_SIZE][10010];
+
 
 int main()
 {
-    cin >> r >> c;
-    REPD(i, r) cin >> keyboard[i];
-    cin >> text;
-    text.push_back('*');
+  string text;
+  cin >> r >> c;
+  REPD(i, r) cin >> keyboard[i];
+  REPD(d, 4) find_displace(d);
 
-    // shortest path
-    construct_distance();
-    warshall_floyd();
+  cin >> text;
+  text.push_back('*');
+  
+  deque<node> q;
+  q.push_back(make_tuple(0, 0, 0));
+  dist[0][0][0] = 1;
 
-    // REPD(i, r * c) REPD(j, r * c) 
-    //  if (dist[i][j] < INF && dist[i][j] > 0) 
-    //      printf("(%d,%d) -> [%d,%d] = %lld\n", row_of(i), column_of(i), row_of(j), column_of(j), dist[i][j]);
+  while (!q.empty()) {
+    node n = q.front();
+    q.pop_front();
 
-    map<pos, ll> current;
-    current[0] = 0LL;
+    int i = get<0>(n);
+    int j = get<1>(n);
+    int k = get<2>(n);
 
-    map<char, vector<pos> > nodes_of_key;
-    REPD(i, r) REPD(j, c) nodes_of_key[keyboard[i][j]].push_back(node_of(i, j));
+    REPD(d, 4) {
+      int ni = i + ((d == N || d == S) ? displace[d][i][j] : 0);
+      int nj = j + ((d == N || d == S) ? 0 : displace[d][i][j]);
 
-
-    snuke(text, k) {
-        map<pos, ll> next;
-        snuke(current, it) snuke(nodes_of_key[*k], jt) {
-            pos current_idx = it->first;
-            pos next_idx = *jt;
-            ll current_dist = it->second;
-            next[next_idx] = min(next.find(next_idx) == next.end() ? INF : next[next_idx],
-                                 current_dist + dist[current_idx][next_idx]);
-        }
-        current = next;
+      if (dist[ni][nj][k] == 0) {
+        dist[ni][nj][k] = dist[i][j][k] + 1;
+        q.push_back(make_tuple(ni, nj, k));
+      }
     }
-
-    ll min_keystroke = INF;
-    snuke(current, it) min_keystroke = min(min_keystroke, it->second);
-    cout << (min_keystroke + text.length()) << endl; 
+    if (k < text.size() && keyboard[i][j] == text[k]) {
+      if (k == text.size() - 1) {
+        cout << dist[i][j][k] << endl;
+        break;
+      }
+      if (dist[i][j][k + 1] == 0) {
+        dist[i][j][k + 1] = dist[i][j][k] + 1;
+        q.push_back(make_tuple(i, j, k + 1));
+      }
+    }
+  }
+ 
+  return 0;
 }
