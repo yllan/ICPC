@@ -21,20 +21,13 @@ typedef unsigned long long ull;
 #define MAX_F 90
 
 unordered_map<ull, bool> mem;
-vector<string> f;
 ull len_f[MAX_F]; // the length of F[n]. (n > 90 will exceed the max of ull)
 void init()
 {
   len_f[0] = 1;
   len_f[1] = 1;
-  f.push_back("0");
-  f.push_back("1");
-  for (int i = 2; i < MAX_F; i++) {
+  for (int i = 2; i < MAX_F; i++)
     len_f[i] = len_f[i - 1] + len_f[i - 2];
-    if (len_f[i] < 100000) {
-      f.push_back(f[i - 1] + f[i - 2]);
-    }
-  }
 }
 
 bool prefix(int n, string &pat, int begin, int len)
@@ -58,7 +51,6 @@ bool prefix(int n, string &pat, int begin, int len)
   ull sig = ((((ull)begin * 1000000ull) + (ull)len) * 1000ull + (ull)n) * 2ull;
   auto it = mem.find(sig);
   if (it != mem.end()) {
-    // cerr << "hit! " << n << ", " << begin << ", " << len << endl;
     return it->second;
   } else {
     bool ans = prefix(n, pat, begin, len_f[n]) && prefix(n - 1, pat, begin + len_f[n], len - len_f[n]);
@@ -91,7 +83,6 @@ bool suffix(int n, string &pat, int begin, int len)
     ull sig = ((((ull)begin * 1000000ull) + (ull)len) * 1000ull + (ull)n) * 2ull + 1ull;
     auto it = mem.find(sig);
     if (it != mem.end()) {
-      // cerr << "hit! " << n << ", " << begin << ", " << len << endl;
       return it->second;
     } else {
       bool ans = suffix(n - 1, pat, begin, len - len_f[n - 2]) && suffix(n - 2, pat, begin + len - len_f[n - 2], len_f[n - 2]);
@@ -125,10 +116,8 @@ int main(int argc, char const *argv[])
       // auto t1 = chrono::high_resolution_clock::now();
       // proper decomposition
       if (calced[m % 2]) {
-        // cerr << "reuse!\n";
         sub_answer = sub[m % 2];
       } else {
-        // cerr << "calc!\n";
         for (int prefix_len = 1; prefix_len < pat.size(); prefix_len++) {
           sub_answer += suffix(m - 1, pat, 0, prefix_len) && prefix(m - 2, pat, prefix_len, pat.size() - prefix_len) ? 1 : 0;
         }
@@ -139,7 +128,6 @@ int main(int argc, char const *argv[])
       }
       // auto t2 = chrono::high_resolution_clock::now();
       // cerr << "Timing for " << m << "=" << sub_answer << ": " << chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << endl;
-      // cerr << m << ": " << sub_answer << "\n";
       ans[m] += sub_answer;
     }
     cout << "Case " << c++ << ": " << ans[n] << endl;
