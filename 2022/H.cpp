@@ -24,20 +24,19 @@ int main() {
         }
       }
     }
-    if (closing == 0) {
+    if (opening - closing >= 0) {
       tablets.emplace_back(0, closing, opening, i + 1);
-    } else if (opening == 0) {
-      tablets.emplace_back(3, closing, opening, i + 1);
-    } else if (opening - closing >= 0) {
-      tablets.emplace_back(1, closing, opening, i + 1);
     } else {
-      tablets.emplace_back(2, closing, opening, i + 1);
+      tablets.emplace_back(1, -opening, closing, i + 1);
     }
   }
 
   sort(tablets.begin(), tablets.end());
   int64_t balance = 0;
-  for (auto [t, closing, opening, pos]: tablets) {
+  for (auto [t, a, b, pos]: tablets) {
+    int opening = t ? -a : b;
+    int closing = t ? b : a;
+    balance -= closing;
     if (balance < 0) break;
     balance += opening;
   }
