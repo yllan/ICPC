@@ -26,7 +26,9 @@ int main() {
     }
     if (closing == 0) {
       tablets.emplace_back(0, closing, opening, i + 1);
-    } else if (opening > 0 && opening - closing >= 0) {
+    } else if (opening == 0) {
+      tablets.emplace_back(3, closing, opening, i + 1);
+    } else if (opening - closing >= 0) {
       tablets.emplace_back(1, closing, opening, i + 1);
     } else {
       tablets.emplace_back(2, closing, opening, i + 1);
@@ -34,10 +36,8 @@ int main() {
   }
 
   sort(tablets.begin(), tablets.end());
-
   int64_t balance = 0;
   for (auto [t, closing, opening, pos]: tablets) {
-    balance -= closing;
     if (balance < 0) break;
     balance += opening;
   }
