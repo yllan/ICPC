@@ -24,8 +24,13 @@ int main() {
         }
       }
     }
-    int type = closing == 0 ? 0 : (opening == 0 ? 2: 1); // ((( first, )))((( middle, ))) last
-    tablets.emplace_back(type, closing, opening, i + 1);
+    if (closing == 0) {
+      tablets.emplace_back(0, closing, opening, i + 1);
+    } else if (opening > 0 && opening - closing >= 0) {
+      tablets.emplace_back(1, closing, opening, i + 1);
+    } else {
+      tablets.emplace_back(2, closing, opening, i + 1);
+    }
   }
 
   sort(tablets.begin(), tablets.end());
